@@ -1,79 +1,134 @@
 """losses.py - các hàm loss và trộn mẫu (Mixup, CutMix).
 
-PSEUDO-CODE: bạn tự hoàn thiện mọi hàm/lớp có `raise NotImplementedError`.
-Liên hệ slide Day 2: label smoothing (trang 56), focal loss (trang 57), Mixup/CutMix (trang 48).
-
-Giao diện bạn phải giữ:
+Giao diện:
     build_criterion(kind, **kw)                 -> callable(logits, target) -> loss scalar
     class_weights(counts, beta)                 -> tensor trọng số lớp
     mix_batch(x, y, alpha, mode)                -> (x_mixed, (y_a, y_b, lam))
     mixed_loss(criterion, logits, targets)      -> loss scalar
+
+Kiểm tra tự viết (focal gamma=0 == CE, label smoothing eps=0 == CE, CutMix lam theo diện tích thật)
+nằm ở test_code.py.
 """
 from __future__ import annotations
 
+import math
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 
 def build_criterion(kind: str = "ce", **kw):
-    """Trả về hàm loss theo `kind`: "ce", "ls" (label smoothing), "focal", "ce_weighted".
-
-    Ví dụ kw: smoothing=0.1, gamma=2.0, alpha=None, weight=tensor.
-    TODO: tạo đúng loss, hoặc gọi các lớp bên dưới.
+    """Trả về hàm loss theo `kind`:
+      "ce"          : cross-entropy
+      "ls"          : label smoothing (kw smoothing, mặc định 0.1)
+      "focal"       : focal loss (kw gamma, alpha)
+      "ce_weighted" : CE có trọng số lớp (kw weight = tensor từ class_weights)
     """
-    raise NotImplementedError("TODO")
+    if kind == "ce":
+        return nn.CrossEntropyLoss()
+    if kind == "ls":
+        return LabelSmoothingCE(kw.get("smoothing", 0.1))
+    if kind == "focal":
+        return FocalLoss(kw.get("gamma", 2.0), kw.get("alpha"))
+    if kind == "ce_weighted":
+        weight = kw.get("weight")
+        if weight is None:
+            raise ValueError("ce_weighted cần weight = class_weights(...)")
+        return nn.CrossEntropyLoss(weight=torch.as_tensor(weight, dtype=torch.float32))
+    raise ValueError(f"loss không hợp lệ: {kind}")
 
 
-class LabelSmoothingCE:  # TODO: kế thừa torch.nn.Module
-    """Cross-entropy với label smoothing: q'(k) = (1 - eps) * 1[k == y] + eps / K  (slide trang 56).
+class LabelSmoothingCE(nn.Module):
+    """Cross-entropy với label smoothing: q'(k) = (1 - eps) * 1[k == y] + eps / K.
 
-    TODO: tự cài đặt hoặc dùng torch.nn.CrossEntropyLoss(label_smoothing=eps), rồi ghi rõ
-    bạn đã chọn cách nào. Kiểm tra: eps = 0 phải cho đúng CE.
+    Cài đặt: tự viết từ log_softmax (không dùng tham số label_smoothing của PyTorch),
+    test_code.py so với F.cross_entropy(label_smoothing=eps) và với CE khi eps = 0.
     """
 
     def __init__(self, smoothing: float = 0.1):
-        raise NotImplementedError("TODO")
+        super().__init__()
+        self.smoothing = float(smoothing)
+
+    def forward(self, logits, target):
+        logp = F.log_softmax(logits.float(), dim=-1)
+        k = logits.shape[-1]
+        nll = -logp.gather(1, target[:, None]).squeeze(1)
+        uniform = -logp.mean(dim=-1)  # = sum_k (1/K) * (-log p_k)
+        return ((1 - self.smoothing) * nll + self.smoothing * uniform).mean()
 
 
-class FocalLoss:  # TODO: kế thừa torch.nn.Module
-    """Focal loss nhiều lớp: FL(p_t) = -alpha_t * (1 - p_t)^gamma * log(p_t)  (slide trang 57).
-
-    TODO:
-      - tính log_softmax, lấy p_t của lớp đúng, nhân (1 - p_t)^gamma, lấy trung bình batch
-      - alpha: None hoặc vector trọng số theo lớp
-    BẮT BUỘC viết một kiểm tra nhỏ: gamma = 0 phải cho đúng cross-entropy (sai số < 1e-6).
-    """
+class FocalLoss(nn.Module):
+    """Focal loss nhiều lớp: FL(p_t) = -alpha_t * (1 - p_t)^gamma * log(p_t), lấy trung bình batch."""
 
     def __init__(self, gamma: float = 2.0, alpha=None):
-        raise NotImplementedError("TODO")
+        super().__init__()
+        self.gamma = float(gamma)
+        self.register_buffer("alpha", None if alpha is None else torch.as_tensor(alpha, dtype=torch.float32))
+
+    def forward(self, logits, target):
+        logp = F.log_softmax(logits.float(), dim=-1)
+        logp_t = logp.gather(1, target[:, None]).squeeze(1)
+        p_t = logp_t.exp()
+        loss = -((1 - p_t) ** self.gamma) * logp_t
+        if self.alpha is not None:
+            loss = loss * self.alpha.to(logits.device)[target]
+        return loss.mean()
 
 
 def class_weights(counts, beta: float = 0.0):
-    """Trọng số theo lớp từ số ảnh mỗi lớp trong tập TRAIN.
+    """Trọng số lớp từ số ảnh mỗi lớp của tập TRAIN.
 
-    - beta = 0: trọng số tỉ lệ nghịch với số ảnh (1 / n_c), chuẩn hoá về trung bình 1
-    - beta > 0: class-balanced theo "số mẫu hiệu dụng": w_c = (1 - beta) / (1 - beta ** n_c)
-      (slide trang 57, Cui et al. arXiv:1901.05555); chuẩn hoá tổng trọng số về số lớp
-
-    TODO: trả về tensor độ dài 9. Chỉ dùng số liệu của train, không dùng val hay test.
+    - beta = 0: w_c = 1 / n_c, chuẩn hoá về trung bình 1
+    - beta > 0: class-balanced, w_c = (1 - beta) / (1 - beta ** n_c), chuẩn hoá tổng = số lớp
+    (hai cách chuẩn hoá cùng cho tổng = K, nên cùng thang)
     """
-    raise NotImplementedError("TODO")
+    n = np.asarray(counts, dtype=np.float64)
+    if (n <= 0).any():
+        raise ValueError("mọi lớp phải có ít nhất 1 ảnh trong train")
+    if beta and beta > 0:
+        w = (1.0 - beta) / (1.0 - np.power(beta, n))
+    else:
+        w = 1.0 / n
+    w = w / w.sum() * len(n)
+    return torch.as_tensor(w, dtype=torch.float32)
 
 
-def mix_batch(x, y, alpha: float = 1.0, mode: str = "cutmix"):
-    """Trộn một batch ảnh và nhãn.
+def rand_bbox(h: int, w: int, lam: float, rng: np.random.Generator):
+    """Hộp ngẫu nhiên có diện tích danh nghĩa (1 - lam) * h * w, cắt theo biên ảnh."""
+    cut = math.sqrt(1.0 - lam)
+    ch, cw = int(h * cut), int(w * cut)
+    cy, cx = rng.integers(h), rng.integers(w)
+    y1, y2 = np.clip(cy - ch // 2, 0, h), np.clip(cy + ch // 2, 0, h)
+    x1, x2 = np.clip(cx - cw // 2, 0, w), np.clip(cx + cw // 2, 0, w)
+    return int(y1), int(y2), int(x1), int(x2)
 
-    - lam ~ Beta(alpha, alpha)
-    - mode="mixup": x_mix = lam * x + (1 - lam) * x[perm]
-    - mode="cutmix": cắt một hộp chữ nhật từ x[perm] dán vào x, rồi điều chỉnh lam theo
-      DIỆN TÍCH THỰC của hộp sau khi cắt ra ngoài biên (slide trang 48)
-    - trả về (x_mix, (y_a, y_b, lam)) với y_a = y, y_b = y[perm]
 
-    TODO: tự cài đặt. Kiểm tra bằng mắt: vẽ vài ảnh sau khi trộn và in lam.
+def mix_batch(x, y, alpha: float = 1.0, mode: str = "cutmix", rng: np.random.Generator | None = None):
+    """Trộn một batch ảnh và nhãn. lam ~ Beta(alpha, alpha).
+
+    - mixup : x_mix = lam * x + (1 - lam) * x[perm]
+    - cutmix: dán hộp từ x[perm] vào x, rồi đặt lại lam = 1 - (diện tích thật của hộp sau khi cắt biên) / (H*W)
+    Trả về (x_mix, (y_a, y_b, lam)) với y_a = y, y_b = y[perm]. Dùng numpy RNG đã seed (set_seed) để tái lập.
     """
-    raise NotImplementedError("TODO")
+    rng = rng if rng is not None else np.random.default_rng(int(np.random.randint(2 ** 31)))
+    lam = float(rng.beta(alpha, alpha))
+    perm = torch.as_tensor(rng.permutation(x.shape[0]), device=x.device)
+    if mode == "mixup":
+        x_mix = lam * x + (1 - lam) * x[perm]
+    elif mode == "cutmix":
+        h, w = x.shape[-2:]
+        y1, y2, x1, x2 = rand_bbox(h, w, lam, rng)
+        x_mix = x.clone()
+        x_mix[..., y1:y2, x1:x2] = x[perm][..., y1:y2, x1:x2]
+        lam = 1.0 - (y2 - y1) * (x2 - x1) / float(h * w)
+    else:
+        raise ValueError(f"mode không hợp lệ: {mode}")
+    return x_mix, (y, y[perm], lam)
 
 
 def mixed_loss(criterion, logits, targets):
-    """Loss cho batch đã trộn: lam * criterion(logits, y_a) + (1 - lam) * criterion(logits, y_b).
-
-    TODO. Lưu ý: accuracy trên batch đã trộn không còn nghĩa bình thường; đánh giá bằng val.
-    """
-    raise NotImplementedError("TODO")
+    """lam * criterion(logits, y_a) + (1 - lam) * criterion(logits, y_b)."""
+    y_a, y_b, lam = targets
+    return lam * criterion(logits, y_a) + (1 - lam) * criterion(logits, y_b)
