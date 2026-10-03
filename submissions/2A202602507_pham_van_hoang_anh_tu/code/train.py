@@ -89,6 +89,7 @@ class Config:
     out_dir: str = "runs"             # config.json, history.csv, checkpoint, logit của từng lần chạy
     pred_dir: str = "predictions"     # file dự đoán đúng định dạng eval.py (nộp cùng bài)
     curves_dir: str = "curves"
+    logs_dir: str | None = "logs"     # bản sao nhỏ (config/history/done) trong thư mục nộp để truy ngược exp_id
     expected_total: int | None = 17509  # chỉ đặt None khi chạy thử trên bộ ảnh mẫu
     # --- chỉ bật ở Bước 4 (chung kết): ghi predictions trên TEST. Mặc định TẮT (quy tắc S4). ---
     save_test_predictions: bool = False
@@ -314,6 +315,31 @@ def _metrics(ev, y_true, logits) -> dict:
     return m
 
 
+def export_logs(cfg: Config) -> None:
+    """Chép config.json, history.csv, done.json (vài KB) sang <logs_dir>/<exp_id>_seed<k>/ trong thư mục nộp,
+    để mọi số trong bảng truy ngược được tới log (RUBRIC P2). Checkpoint KHÔNG chép."""
+    import shutil
+    if not cfg.logs_dir:
+        return
+    dst = Path(cfg.logs_dir) / f"{cfg.exp_id}_seed{cfg.seed}"
+    dst.mkdir(parents=True, exist_ok=True)
+    for name in ("config.json", "history.csv", "done.json"):
+        f = run_dir(cfg) / name
+        if f.exists():
+            shutil.copy(f, dst / name)
+
+
+def collect_summaries(out_dir: str | Path, prefix: str = "") -> "pd.DataFrame":
+    """Gom done.json của mọi run (exp_id bắt đầu bằng `prefix`) thành một bảng."""
+    import pandas as pd
+    rows = []
+    for f in sorted(Path(out_dir).glob(f"{prefix}*/seed*/done.json")):
+        d = json.loads(f.read_text())
+        d.pop("val_f1_per_class", None)
+        rows.append(d)
+    return pd.DataFrame(rows)
+
+
 def run(cfg: Config) -> dict:
     """Huấn luyện một cấu hình và lưu mọi thứ cần thiết. Trả về dict kết quả tóm tắt.
 
@@ -349,6 +375,7 @@ def run(cfg: Config) -> dict:
         summary = _train(cfg, rd, device, ev, train_df, val_df, eval_tf, new_model,
                          build_transforms, make_loader, build_criterion, class_weights,
                          count_params, count_gmacs, weight_tag)
+    export_logs(cfg)
 
     # ---- xuất dự đoán (Bước 4): từ best.pt, không train lại ----
     if cfg.export_val_predictions:
