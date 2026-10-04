@@ -128,5 +128,67 @@ class TestModelAndOptim(unittest.TestCase):
         self.assertFalse(c.save_test_predictions)
 
 
+class TestInference(unittest.TestCase):
+    """Bước 3: TTA, gộp view, temperature scaling, soup, gộp BN, đo độ trễ."""
+
+    def test_hflip_and_multicrop(self):
+        import inference as inf
+        x = torch.arange(2 * 3 * 8 * 8, dtype=torch.float32).reshape(2, 3, 8, 8)
+        self.assertTrue(torch.equal(inf.view_hflip(x)[..., 0], x[..., -1]))
+        crops = inf.views_multicrop(x, 6, flip=True)
+        self.assertEqual(len(crops), 10)
+        self.assertTrue(all(c.shape == (2, 3, 6, 6) for c in crops))
+        self.assertTrue(torch.equal(crops[0], x[..., :6, :6]))
+
+    def test_aggregate_prob_vs_logit(self):
+        import inference as inf
+        rng = np.random.default_rng(0)
+        a, b = rng.normal(size=(5, 9)), rng.normal(size=(5, 9))
+        for space in ("prob", "logit"):
+            p = inf.aggregate_views([a, b], space)
+            np.testing.assert_allclose(p.sum(1), 1.0, atol=1e-9)
+        np.testing.assert_allclose(inf.aggregate_views([a], "prob"), inf.aggregate_views([a], "logit"), atol=1e-12)
+
+    def test_temperature_recovers_true_T(self):
+        import inference as inf
+        rng = np.random.default_rng(1)
+        z = rng.normal(scale=3.0, size=(4000, 9))
+        p = inf.apply_temperature(z, 2.5)
+        y = np.array([rng.choice(9, p=row) for row in p])
+        T = inf.fit_temperature(z * 1.0, y)  # dữ liệu sinh với T = 2,5
+        self.assertAlmostEqual(T, 2.5, delta=0.25)
+        self.assertAlmostEqual(inf.fit_temperature_views([z], y, "logit"), T, places=3)
+
+    def test_uniform_soup_is_mean(self):
+        import inference as inf
+        a = {"w": torch.ones(3), "n": torch.tensor(5)}
+        b = {"w": torch.zeros(3), "n": torch.tensor(7)}
+        s = inf.uniform_soup([a, b])
+        self.assertTrue(torch.allclose(s["w"], torch.full((3,), 0.5)))
+        self.assertEqual(int(s["n"]), 5)
+
+    def test_fuse_conv_bn_exact(self):
+        import inference as inf
+        torch.manual_seed(0)
+        net = torch.nn.Sequential(torch.nn.Conv2d(3, 8, 3, padding=1), torch.nn.BatchNorm2d(8), torch.nn.ReLU(),
+                                  torch.nn.Conv2d(8, 4, 1, bias=False), torch.nn.BatchNorm2d(4))
+        net.train()
+        for _ in range(3):
+            net(torch.randn(16, 3, 10, 10))  # cập nhật running stats khác mặc định
+        net.eval()
+        fused = inf.fuse_conv_bn(net)
+        self.assertEqual(fused.n_fused, 2)
+        x = torch.randn(4, 3, 10, 10)
+        with torch.no_grad():
+            self.assertLess(float((net(x) - fused(x)).abs().max()), 1e-5)
+
+    def test_bench_percentiles(self):
+        import benchmark
+        r = benchmark.bench(lambda: sum(range(1000)), warmup=3, iters=50)
+        self.assertEqual(r["n"], 50)
+        self.assertLessEqual(r["p50"], r["p95"])
+        self.assertLessEqual(r["p95"], r["p99"])
+
+
 if __name__ == "__main__":
     unittest.main()
