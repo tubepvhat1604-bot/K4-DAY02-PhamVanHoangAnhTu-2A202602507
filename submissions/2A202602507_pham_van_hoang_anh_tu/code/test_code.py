@@ -190,5 +190,24 @@ class TestInference(unittest.TestCase):
         self.assertLessEqual(r["p95"], r["p99"])
 
 
+class TestBuoc5(unittest.TestCase):
+    def test_mean_std_string(self):
+        import buoc5
+        self.assertEqual(buoc5._pm([0.97, 0.98, 0.99]), "0.9800 ± 0.0100")   # std mẫu ddof=1
+        self.assertEqual(buoc5._pm([0.5]), "0.5000")
+
+    def test_check_submission_flags_missing(self):
+        import tempfile
+        import buoc5
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "curves").mkdir()
+            (Path(d) / "predictions").mkdir()
+            (Path(d) / "x.pt").write_bytes(b"0")
+            probs = buoc5.check_submission(d)
+            self.assertIn("thiếu results.xlsx", probs)
+            self.assertIn("predictions/ thiếu F01_seed0_test.csv", probs)
+            self.assertTrue(any("checkpoint" in p for p in probs))
+
+
 if __name__ == "__main__":
     unittest.main()
