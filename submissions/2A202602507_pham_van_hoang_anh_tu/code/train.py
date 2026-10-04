@@ -329,13 +329,18 @@ def export_logs(cfg: Config) -> None:
             shutil.copy(f, dst / name)
 
 
+F1_COLS = ["f1_chinee", "f1_lantana", "f1_parkinsonia", "f1_parthenium", "f1_prickly",
+           "f1_rubber", "f1_siam", "f1_snake", "f1_negative"]
+
+
 def collect_summaries(out_dir: str | Path, prefix: str = "") -> "pd.DataFrame":
     """Gom done.json của mọi run (exp_id bắt đầu bằng `prefix`) thành một bảng."""
     import pandas as pd
     rows = []
     for f in sorted(Path(out_dir).glob(f"{prefix}*/seed*/done.json")):
         d = json.loads(f.read_text())
-        d.pop("val_f1_per_class", None)
+        for name, v in zip(F1_COLS, d.pop("val_f1_per_class", None) or []):
+            d[name] = v  # F1 val từng lớp: f1_chinee ... f1_negative
         rows.append(d)
     return pd.DataFrame(rows)
 
