@@ -1,0 +1,31 @@
+{
+  "exp_id": "B01",
+  "seed": 0,
+  "backbone": "resnet50",
+  "desc": "resnet50",
+  "weight_tag": "resnet50.a1_in1k",
+  "params_M": 23.526,
+  "gmacs": 4.087,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 12,
+  "val_macro_f1": 0.8145078386121446,
+  "val_top1": 0.8654670094258783,
+  "val_balanced_acc": 0.7898635789903883,
+  "val_ece": 0.01796705516465422,
+  "val_f1_per_class": [
+    0.6552706552706553,
+    0.8551068883610451,
+    0.8673469387755103,
+    0.7989276139410187,
+    0.7622950819672131,
+    0.8688524590163934,
+    0.854415274463007,
+    0.7493796526054591,
+    0.9189759831089996
+  ],
+  "train_time_per_epoch_s": 46.884855250517525,
+  "latency_b1_ms_prelim": 7.4521529998037295,
+  "device": "cuda",
+  "curve": "/content/drive/MyDrive/K4-DAY02-PhamVanHoangAnhTu-2A202602507/submissions/2A202602507_pham_van_hoang_anh_tu/curves/B01_resnet50.png"
+}

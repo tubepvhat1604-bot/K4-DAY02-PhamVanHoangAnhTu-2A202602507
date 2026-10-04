@@ -1,0 +1,31 @@
+{
+  "exp_id": "T11",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "trivial_balanced",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 11,
+  "val_macro_f1": 0.9686166700306731,
+  "val_top1": 0.9757212225078549,
+  "val_balanced_acc": 0.9758314484306267,
+  "val_ece": 0.010781941967873982,
+  "val_f1_per_class": [
+    0.9504504504504505,
+    0.9636363636363636,
+    0.983132530120482,
+    0.9927007299270074,
+    0.9695550351288055,
+    0.9875311720698253,
+    0.9681818181818183,
+    0.9178743961352657,
+    0.9844875346260389
+  ],
+  "train_time_per_epoch_s": 50.08556207021078,
+  "latency_b1_ms_prelim": 7.269727999982933,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T11_trivial_balanced.png"
+}

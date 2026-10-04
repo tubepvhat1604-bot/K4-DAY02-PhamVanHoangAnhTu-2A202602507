@@ -1,0 +1,9 @@
+{
+  "convnext_tiny_n_fused": 0,
+  "demo_backbone": "resnet50",
+  "demo_pretrained": true,
+  "demo_n_fused": 53,
+  "max_abs_diff_fp32": 2.1606683731079102e-07,
+  "p50_unfused_ms": 5.676741000002039,
+  "p50_fused_ms": 4.701869999962582
+}

@@ -1,0 +1,31 @@
+{
+  "exp_id": "T08",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "cb_weighted",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 12,
+  "val_macro_f1": 0.9660955879119341,
+  "val_top1": 0.9734361610968295,
+  "val_balanced_acc": 0.9754618408064487,
+  "val_ece": 0.010352390420603742,
+  "val_f1_per_class": [
+    0.9461883408071748,
+    0.9589041095890412,
+    0.9903381642512078,
+    0.9902439024390244,
+    0.9532710280373832,
+    0.9875930521091811,
+    0.9726027397260273,
+    0.9129411764705883,
+    0.9827777777777779
+  ],
+  "train_time_per_epoch_s": 47.66676036516825,
+  "latency_b1_ms_prelim": 7.55045699997936,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T08_cb_weighted.png"
+}

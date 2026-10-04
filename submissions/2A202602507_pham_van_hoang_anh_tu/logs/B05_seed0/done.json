@@ -1,0 +1,31 @@
+{
+  "exp_id": "B05",
+  "seed": 0,
+  "backbone": "mobilenetv3_large_100",
+  "desc": "mobilenetv3",
+  "weight_tag": "mobilenetv3_large_100.ra_in1k",
+  "params_M": 4.214,
+  "gmacs": 0.215,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 12,
+  "val_macro_f1": 0.7244580260408978,
+  "val_top1": 0.7983433304770066,
+  "val_balanced_acc": 0.6895486755419821,
+  "val_ece": 0.03022101520640754,
+  "val_f1_per_class": [
+    0.7461928934010152,
+    0.7381443298969073,
+    0.6595744680851063,
+    0.6476190476190476,
+    0.5212765957446809,
+    0.8480392156862744,
+    0.75,
+    0.7403598971722365,
+    0.8689157867628122
+  ],
+  "train_time_per_epoch_s": 31.812575697898865,
+  "latency_b1_ms_prelim": 8.520377499735332,
+  "device": "cuda",
+  "curve": "/content/drive/MyDrive/K4-DAY02-PhamVanHoangAnhTu-2A202602507/submissions/2A202602507_pham_van_hoang_anh_tu/curves/B05_mobilenetv3.png"
+}

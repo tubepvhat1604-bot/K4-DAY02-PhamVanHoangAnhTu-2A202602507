@@ -1,0 +1,7 @@
+backbone,s_per_step,img_per_s,epoch_min_est,run_12ep_min_est
+resnet50,0.23,279,0.69,8.3
+convnext_tiny,0.268,239,0.81,9.8
+deit_small_patch16_224,0.179,357,0.54,6.4
+efficientnet_b0,0.183,349,0.55,6.6
+mobilenetv3_large_100,0.225,285,0.64,7.6
+swin_tiny_patch4_window7_224,0.349,183,1.07,12.9

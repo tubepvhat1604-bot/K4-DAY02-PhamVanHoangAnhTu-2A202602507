@@ -1,0 +1,31 @@
+{
+  "exp_id": "B06",
+  "seed": 0,
+  "backbone": "swin_tiny_patch4_window7_224",
+  "desc": "swin_tiny",
+  "weight_tag": "swin_tiny_patch4_window7_224.ms_in1k",
+  "params_M": 27.526,
+  "gmacs": 4.49,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 7,
+  "val_macro_f1": 0.9485241389322105,
+  "val_top1": 0.9600114253070551,
+  "val_balanced_acc": 0.9465331449319075,
+  "val_ece": 0.014227062889386197,
+  "val_f1_per_class": [
+    0.8983451536643027,
+    0.9586374695863746,
+    0.9624060150375939,
+    0.9827160493827161,
+    0.9523809523809524,
+    0.9728395061728395,
+    0.9573033707865168,
+    0.8778280542986425,
+    0.9742606790799562
+  ],
+  "train_time_per_epoch_s": 68.6372002561887,
+  "latency_b1_ms_prelim": 18.20718199996918,
+  "device": "cuda",
+  "curve": "/content/drive/MyDrive/K4-DAY02-PhamVanHoangAnhTu-2A202602507/submissions/2A202602507_pham_van_hoang_anh_tu/curves/B06_swin_tiny.png"
+}

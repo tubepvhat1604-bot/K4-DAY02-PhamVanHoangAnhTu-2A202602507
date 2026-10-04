@@ -1,0 +1,31 @@
+{
+  "exp_id": "T01",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "frozen",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 12,
+  "val_macro_f1": 0.8449658881500229,
+  "val_top1": 0.8768923164810054,
+  "val_balanced_acc": 0.8244692920730582,
+  "val_ece": 0.030763632414920524,
+  "val_f1_per_class": [
+    0.809090909090909,
+    0.8337730870712402,
+    0.9014778325123154,
+    0.7549295774647887,
+    0.8179871520342612,
+    0.8866498740554156,
+    0.920863309352518,
+    0.7692307692307693,
+    0.9106904825379899
+  ],
+  "train_time_per_epoch_s": 17.459073662757874,
+  "latency_b1_ms_prelim": 7.831986000155666,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T01_frozen.png"
+}

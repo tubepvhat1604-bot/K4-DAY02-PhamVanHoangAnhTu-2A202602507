@@ -1,0 +1,31 @@
+{
+  "exp_id": "T04",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "cutmix",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 9,
+  "val_macro_f1": 0.9683182469728489,
+  "val_top1": 0.9748643244787204,
+  "val_balanced_acc": 0.9737103722113866,
+  "val_ece": 0.010938292161221858,
+  "val_f1_per_class": [
+    0.957683741648107,
+    0.9677419354838709,
+    0.9714285714285714,
+    0.9951219512195122,
+    0.9617224880382775,
+    0.9875311720698253,
+    0.9658314350797267,
+    0.9249394673123487,
+    0.9828634604754007
+  ],
+  "train_time_per_epoch_s": 48.39421194791794,
+  "latency_b1_ms_prelim": 7.550539000021672,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T04_cutmix.png"
+}

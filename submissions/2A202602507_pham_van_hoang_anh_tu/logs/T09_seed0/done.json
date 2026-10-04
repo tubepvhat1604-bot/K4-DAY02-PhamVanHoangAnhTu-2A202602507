@@ -1,0 +1,31 @@
+{
+  "exp_id": "T09",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "balanced",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 11,
+  "val_macro_f1": 0.9709312899741346,
+  "val_top1": 0.9777206512425022,
+  "val_balanced_acc": 0.9761881467427417,
+  "val_ece": 0.010640844221763448,
+  "val_f1_per_class": [
+    0.9530201342281879,
+    0.954954954954955,
+    0.9828850855745721,
+    0.9950980392156863,
+    0.9674418604651164,
+    0.9900497512437811,
+    0.9724770642201834,
+    0.9362745098039216,
+    0.9861802100608071
+  ],
+  "train_time_per_epoch_s": 47.428243478139244,
+  "latency_b1_ms_prelim": 7.668328999898222,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T09_balanced.png"
+}

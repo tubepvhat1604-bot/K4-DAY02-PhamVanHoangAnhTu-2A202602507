@@ -1,0 +1,31 @@
+{
+  "exp_id": "B04",
+  "seed": 0,
+  "backbone": "efficientnet_b0",
+  "desc": "efficientnet_b0",
+  "weight_tag": "efficientnet_b0.ra_in1k",
+  "params_M": 4.019,
+  "gmacs": 0.385,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 12,
+  "val_macro_f1": 0.7757949990942894,
+  "val_top1": 0.834333047700657,
+  "val_balanced_acc": 0.7716486030019668,
+  "val_ece": 0.03869646370530096,
+  "val_f1_per_class": [
+    0.6832917705735662,
+    0.685483870967742,
+    0.8052516411378556,
+    0.7207207207207207,
+    0.7518427518427517,
+    0.859090909090909,
+    0.8410757946210269,
+    0.7349081364829396,
+    0.9004893964110929
+  ],
+  "train_time_per_epoch_s": 36.02968581517538,
+  "latency_b1_ms_prelim": 10.807675500018377,
+  "device": "cuda",
+  "curve": "/content/drive/MyDrive/K4-DAY02-PhamVanHoangAnhTu-2A202602507/submissions/2A202602507_pham_van_hoang_anh_tu/curves/B04_efficientnet_b0.png"
+}

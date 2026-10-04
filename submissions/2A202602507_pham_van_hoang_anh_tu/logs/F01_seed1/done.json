@@ -1,0 +1,31 @@
+{
+  "exp_id": "F01",
+  "seed": 1,
+  "backbone": "convnext_tiny",
+  "desc": "trivial",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 11,
+  "val_macro_f1": 0.9736984864097068,
+  "val_top1": 0.980576978006284,
+  "val_balanced_acc": 0.9723366724011322,
+  "val_ece": 0.009103933885008332,
+  "val_f1_per_class": [
+    0.9565217391304347,
+    0.9767441860465116,
+    0.9854368932038835,
+    0.9950738916256158,
+    0.9598108747044918,
+    0.9900990099009901,
+    0.9813953488372092,
+    0.9294403892944039,
+    0.9887640449438202
+  ],
+  "train_time_per_epoch_s": 48.012304266293846,
+  "latency_b1_ms_prelim": 7.74594800009254,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/F01_seed1_trivial.png"
+}

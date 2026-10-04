@@ -1,0 +1,31 @@
+{
+  "exp_id": "B03",
+  "seed": 0,
+  "backbone": "deit_small_patch16_224",
+  "desc": "deit_small",
+  "weight_tag": "deit_small_patch16_224.fb_in1k",
+  "params_M": 21.669,
+  "gmacs": 4.599,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 11,
+  "val_macro_f1": 0.9470282559403886,
+  "val_top1": 0.9634390174235933,
+  "val_balanced_acc": 0.9450974238952242,
+  "val_ece": 0.008305934872568718,
+  "val_f1_per_class": [
+    0.8904761904761906,
+    0.9354120267260579,
+    0.977886977886978,
+    0.9627791563275433,
+    0.9379310344827586,
+    0.9798994974874372,
+    0.9699769053117783,
+    0.8861386138613861,
+    0.9827539009033671
+  ],
+  "train_time_per_epoch_s": 40.48024845123291,
+  "latency_b1_ms_prelim": 6.5921354998863535,
+  "device": "cuda",
+  "curve": "/content/drive/MyDrive/K4-DAY02-PhamVanHoangAnhTu-2A202602507/submissions/2A202602507_pham_van_hoang_anh_tu/curves/B03_deit_small.png"
+}

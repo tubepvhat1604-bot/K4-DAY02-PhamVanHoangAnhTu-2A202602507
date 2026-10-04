@@ -1,0 +1,12 @@
+{
+  "method": "I04_res288",
+  "loader": "288",
+  "views": [
+    "id"
+  ],
+  "aggregate": "logit",
+  "val_macro_f1_mean_3seed": 0.9784763969487772,
+  "plus_temperature_scaling": true,
+  "realtime_p95_b1_ms": 7.8901769999959015,
+  "rule": "max macro-F1 val trung bình 3 seed trong các phương pháp một mô hình; hòa thì ít view hơn"
+}

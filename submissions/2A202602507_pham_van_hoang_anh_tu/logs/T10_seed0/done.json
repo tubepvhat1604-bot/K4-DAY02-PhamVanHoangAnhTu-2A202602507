@@ -1,0 +1,31 @@
+{
+  "exp_id": "T10",
+  "seed": 0,
+  "backbone": "convnext_tiny",
+  "desc": "ema",
+  "weight_tag": "convnext_tiny.in12k_ft_in1k",
+  "params_M": 27.827,
+  "gmacs": 4.455,
+  "img_size": 224,
+  "epochs": 12,
+  "best_epoch": 9,
+  "val_macro_f1": 0.96552076326228,
+  "val_top1": 0.9737217937732077,
+  "val_balanced_acc": 0.9617625348085007,
+  "val_ece": 0.010673792574685538,
+  "val_f1_per_class": [
+    0.9280742459396751,
+    0.9716981132075472,
+    0.9728395061728394,
+    0.9950738916256158,
+    0.9505882352941176,
+    0.985,
+    0.9837587006960558,
+    0.919047619047619,
+    0.9836065573770492
+  ],
+  "train_time_per_epoch_s": 48.048789262771606,
+  "latency_b1_ms_prelim": 7.4776145002033445,
+  "device": "cuda",
+  "curve": "/kaggle/working/sub/curves/T10_ema.png"
+}
