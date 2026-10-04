@@ -287,9 +287,16 @@ Làm trên **val**, không huấn luyện lại. Mô hình là F01 seed 0; các 
   - Vì vậy recall Snake weed giảm nhẹ từ 96,1 % xuống 94,6 %, và đây là lớp có F1 thấp nhất của F01.
 
 **Phân tích lỗi bằng ảnh** (`curves/errors_F01_seed0.png`, ô B5.2): ảnh test F01 seed 0 bị đoán sai ở 4 cặp. Ở seed 0, Chinee → Snake có 1 ảnh, Snake → Chinee 2 ảnh, Snake → Negative 11 ảnh, Chinee → Negative 5 ảnh.
-- **Giả thuyết (chưa kiểm chứng):** DeepWeeds chụp cỏ trong môi trường tự nhiên, nhiều ảnh chỉ có một phần nhỏ cây đích lẫn trong cỏ nền.
-  - TrivialAugment (crop, đổi màu mạnh) cùng việc test ở 288 khiến mô hình đòi bằng chứng rõ hơn trước khi gọi tên một loài. Kết quả là các ảnh chỉ có ít lá Snake weed hoặc Prickly acacia bị đẩy về `Negative`.
-  - Muốn kiểm chứng, có thể dời ngưỡng quyết định cho `Negative` trên val, hoặc đo recall theo tỉ lệ diện tích cây trong ảnh. Bài này chưa làm vì cần gắn nhãn thêm.
+
+Quan sát trực tiếp trên ảnh:
+- **Chinee apple ↔ Snake weed** (3 ảnh, đều điều kiện chụp xấu):
+  - Ảnh Chinee bị đoán là Snake (`20170207-154046`, p = 0,64) rất tối, bóng đổ gắt, màu lệch hồng.
+  - Hai ảnh Snake bị đoán là Chinee là thảm lá nhỏ dày đặc nhìn từ xa. Một ảnh (`20170707-111523`) có bóng người chiếm gần nửa khung, cây đích chỉ là một mảng nhỏ.
+- **Lớp cỏ → `Negative`** (16 ảnh), ba kiểu lỗi:
+  - Cây đích chỉ chiếm một phần nhỏ khung hình, nền là cỏ khô hoặc cỏ xanh lẫn lá rụng. Ví dụ `20170704-153756` (Snake) và `20170718-101135` (Chinee) gần như chỉ thấy cỏ.
+  - Ảnh chụp rất gần, chỉ thấy vài lá to (`20170217-113636`), thiếu hình dạng cả cây.
+  - Hai ảnh Snake liên tiếp cùng một cảnh (`20170630-155109` và `20170630-155129`) đều bị đoán `Negative` với xác suất 0,98–1,00. Lỗi đi theo cụm ảnh chụp cùng chỗ cùng lúc, nên các ảnh test không độc lập với nhau. Điều này củng cố hạn chế "chia ngẫu nhiên, không theo địa điểm" ở mục 8.
+- **Giả thuyết (chưa kiểm chứng):** khi cây đích chỉ là một phần nhỏ của ảnh hoặc ảnh bị thiếu sáng, F01 nghiêng về `Negative`. TrivialAugment (crop, đổi màu mạnh) và việc test ở 288 có thể khiến mô hình đòi bằng chứng rõ hơn trước khi gọi tên một loài. Điều này khớp với số liệu: ảnh `Negative` bị đoán thành cỏ giảm từ 108 xuống 35 lượt, còn ảnh cỏ bị đoán là `Negative` tăng từ 69 lên 102 lượt. Cách kiểm chứng: dời ngưỡng quyết định cho `Negative` trên val, hoặc đo recall theo tỉ lệ diện tích cây trong ảnh. Với ứng dụng phun thuốc, bỏ sót cỏ (lỗi về phía `Negative`) có thể tốn kém hơn phun nhầm, nên ngưỡng này nên chọn theo chi phí thực tế.
 
 ## 7. Kết luận và khuyến nghị
 
